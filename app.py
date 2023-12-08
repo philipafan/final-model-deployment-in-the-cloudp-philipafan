@@ -8,7 +8,7 @@ def main():
     # set up the Streamlit app
     st.write("Name: Afan, Philip Sebastian")
     st.write("Section: CPE32S2")
-    st.write("Instructor: Dr. Jonathan V. Taylar")
+    st.write("Instructor: Engr. Roman Richard")
     st.title("Mammal Types ( Bear/Elephant)")
     st.write("This app classifies if it's a bear or an elephant.")
    
