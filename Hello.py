@@ -1,51 +1,47 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import streamlit as st
-from streamlit.logger import get_logger
+import tensorflow as tf
+from PIL import Image, ImageOps
+import numpy as np
+import cv2
 
-LOGGER = get_logger(__name__)
+def main():
+    # set up the Streamlit app
+    st.write("Name: Afan, Philip Sebastian")
+    st.write("Section: CPE32S2")
+    st.write("Instructor: Dr. Jonathan V. Taylar")
+    st.title("Mammal Types ( Bear/Elephant)")
+    st.write("This app classifies if it's a bear or an elephant.")
+   
+    @st.cache_resource
+    def load_model():
+        model = tf.keras.models.load_model('weights-improvement-11-0.98.hdf5')
+        return model
+    
+    def import_and_predict(image_data, model):
+        size=(128,128)
+        image = ImageOps.fit(image_data,size, Image.LANCZOS)
+        image = np.asarray(image)
+        image = image / 255.0
+        img_reshape = np.reshape(image, (1, 128, 128, 3))
+        prediction = model.predict(img_reshape)
+        return prediction
 
+    model = load_model()
+    class_names = ["Bear", "Elephant"]
+    
 
-def run():
-    st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
-    )
+    file = st.file_uploader("Choose a Bear or an Elephant picture from the computer", type=["jpg", "png", "jpeg"])
 
-    st.write("# Welcome to Streamlit! 👋")
-
-    st.sidebar.success("Select a demo above.")
-
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
-
-
+    if file is None:
+        st.text("Please upload an image file")
+    else:
+        image = Image.open(file)
+        st.image(image, use_column_width=True)
+        prediction = import_and_predict(image, model)
+        class_index = np.argmax(prediction)
+        class_name = class_names[class_index]
+        string = "Prediction: " + class_name
+        st.success(string)
+ 
 if __name__ == "__main__":
-    run()
+    main()
